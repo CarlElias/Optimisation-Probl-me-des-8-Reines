@@ -1,0 +1,44 @@
+Méthode de Recherche avec TABOUS
+
+les methodes de recherche tabou ont ete formalise en 1986 par Glover mais les origines remontent en 1977 et sont lié a des concept issu du domaine de l'IA.
+la RT s'est revele particulierement efficace sur de nombreux probleme difficile.
+elle consiste en un ensemble de règle et de mécanisme généraux qui ont comme fonction de controler et de guider une lingustique interne specifiquement adapté au problème à résoudre afin de lui permettre de transcender l'obstacle des obtima locaux.
+A la difference des algorithme ... ou du recul similé, ils font appel a un argument probabiliste pour atteindre cet objectif . La RT exploite quand a elle, la notion de mémoire.
+L'idee de base s'insipire de technique de recherche utilisé en IA. Elle consiste a garde la trace du cheminement passé du processus de recherche dans une ou des memeoires et se servire de cette information afin d'en orienter le deroulement futur. Plus formelement, la RT peut etre vu comme une généralisation des methode d'amelioration des recherches local.
+En effet, celle ci exploire iterrativement l'espace X des solution d'un probleme d'optimisation donné en ce  déplacent d'une solution courante "s" (tq s € X) à une nouvelle solution X' situé dans le voisinage de S. toutefois, contrairement au méthode itérative classique, il s'arrete dès qu'il n'y a plus de S'[S' est defini comme étant la meilleur solution parmi les élément de N(s) sans référence aucune à f(s)] permettant d'ameliorer S.
+ceci permet à la RT de poursuivre la recherche de solution meilleur meme ci cela entraine une dégradation de la fonction objective ; Cette modification du processus d'exploration rend donc la RT insensible au optima du couple, mais elle introduit du meme cout le risque de cyclé dès que l'on sorrt de un de ces optimal en y retournant aussi tôt ; C'est là que la notion de mémoire trouve sa justification.
+Pour regler ce probleme, la RT conserve des informations sur le cheminement recent effecuté a travers X afin d'interdire certaine transformation de la solution courante qui pourrais ramene la procedure vers des solutions déjà rencontré ;
+Ces transformations sont appele TABOU d'ou le nom de la méthode; Toute fois pour conserver à l'apporche suffisament de flexibilité le charactère tabou de ces transformations ne doit pas être maintenu en permanance ; en limitant la durée de vie des Tabous, on permet à la methode de remetre en question ces chois passé et ainsi de menne une exploration bcp plus large du domaine d'exploration.
+
+Les Tabous
+la definitions de la gestion des tabous joue bien entendu un role primordiale dans la RT; c'est une sorte de memoire a cour terme permettans à la methode de dirigé son exploration. La facon la plus simple de mettre en oeuvre cette memoire de la methode consiste à conserver une liste T des derniere solution rencontré et à interdire à la procedure d'y retourner ; toutefois ce genre de liste nre represent géneralment pas la meilleur facon de faire car elle peut rapidement s'averer très encombrante et couteuse à gerer.
+étant donné la quantité d'information requise, pour decrire completement une solution.
+la methode la plus frequement utilisé consiste à definir les tabous en fonctions des transformations qui permettent de se deplacer d'une solution à une autre. On garde alors plus tot une liste des |T| dernier transformatin effectué ou de certaine de leur caracteristique et on interdit à la procedure de les inverser. 
+les tabous sont un mecanismes dont le but premier est d'empecher le cyclage de la methode mais ceux ci peut parfois s'avere trop fort et ainsi restreindre unitilement l'exploratin du domaine des solutions, en particulier lorsque les tabous sont définis en fonction des transformations. Ilms s'interdisent pas seulement de retourner à la solutiojn precedente, mais à tout un ensemble de solution dont plusieurs peuvent ne pas avoir été visité encore. Il est donc necessaire d'avoir un mecanisme inverse à celui des tabous qui permettent de revoquer le statut TABOUS d'une transformation si son application à une solution courante permet d'atteindre une solution G interresante sans pour autant introduire un risque de cyclage dans le processus .
+
+C'est le concept du critère d'aspiration. Plusieur critere d'aspiration ont été developpe, deux d'entre eux ce sont avere tres efficace.
+le critere d'aspiration le plus simple consiste à revoquer le status TABOUS associé à une transformation si cela permet d'obtenir une solution qui est superieur à la meilleur soltuion rencontré jusqu'a présent.
+C'est un critère tres sévère qui n'est pas tres souvent verifié; cela ajoute tres peu de flexibilité à la methode, mais lui permet de ne pas connaitre d'oubli lorsuqe ce genre de situation ce presente.
+la deuxieme methode d'aspiration utilise une function A(z) determinant le niveau d'aspiration associé à chaque valeur z la functin objectif Z. 
+Etant donne une solution conrante s avec f(s)= z, la valeur A(z) represente un seuil à atteindre si l'on veut s'assurer de ne pas cycler.
+Ainsi, quand on considere une transformation TABOUS menant de s à une solution s' voisine de valeur f(s'),
+	si f(s') <= A(z) dans un conteste de minimisation, alors on est sur que cette solution n'a jamais été visité auparavant et on peut revoquer le status TABOUS  de cette transformation sans risque.
+Ce genre de fonction s'applique à des problemes pour lesquelles les valeur de la fonction objectif sont entière.
+on initialise A(z) en prenant A(z) = z-1 pour toutes les valeur de z puis chaque fois qu'on effectue une transformation s à s' tq f(s') <= A(f(s)) , on pose A(f(s)) = f(s') - 1. 
+C'est cette fonction de d'aspiration qui est indiqué dans notre problème à resoudre.
+soit k un competeur d'itération, étant donné que le sous ensomble des solution s' € N(s) qui sont sous l'effet d'un TABOUS depend de la trajectoire passé de l'algorithme donc de l'itération k. 
+On designe par N(s, k) l'ensmble des solutions admissible a partir de s à l'interation k, c-à-d les solutions non TABOUS ou dont le status TABOU à été revoqué
+
+Algorithme
+	* Choisir une solution initiale s0 € X
+	* poser S := S* := s0, f* := f(s0) et k := 0
+	* critère d'arrêt : different citere d'arrêt peuvent être utilisé parmis ceux ci, les plus courant consiste à arreter la procedure : 
+		-dès qu'on a obtenu une solution obtimale (lorsqu'on en connait la valeur) 
+		-apres un certain  nbr d'iteration ou un certain nombre de cacul
+		-apres qu'un certain nbr d'iteration est été effectué sans qu'il y est eu d'amelioration de la meilleur solution trouvé
+2. Tant que Critère d'arret non satisfait faire 
+	* k := k+1
+	* Choisir s € arg, min {f(s')} : s' € N(s, k)
+		si f(s) < f* alors s* := S et f* := f(s)
+	* mettre à jour les tabous 
+
